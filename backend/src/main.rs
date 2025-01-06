@@ -10,13 +10,14 @@ use tokio::net::TcpListener;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-#[derive(Deserialize, Serialize)]
-struct MyStruct {
-    my_field: String
+#[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
+struct Post {
+    title: String,
+    content: String,
 }
 
 async fn return_a_struct_as_json() -> impl IntoResponse {
-     let my_struct = MyStruct { my_field: "Hello world!".to_string() };
+     let my_struct = Post { title: "First post".to_string(), content: "Content".to_string() };
 
      Json(my_struct)
 }
@@ -25,10 +26,6 @@ async fn root() -> impl IntoResponse {
     Json(json!("Ok"))
 }
 
-#[derive(Debug, sqlx::FromRow)]
-struct Post {
-    title: String,
-}
 
 const DB: &str = "sqlite://sqlite.db";
 
@@ -48,9 +45,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     let pool = sqlx::sqlite::SqlitePool::connect(DB).await?;
     let result = sqlx::query("CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY NOT NULL,
-    title VARCHAR(100) NOT NULL);").execute(&pool).await.unwrap();
-    let res = sqlx::query("INSERT INTO posts (title) VALUES (?)")
+    title VARCHAR(100) NOT NULL,content VARCHAR(500) NOT NULL);").execute(&pool).await.unwrap();
+    let res = sqlx::query("INSERT INTO posts (title, content) VALUES (?, ?)")
         .bind("Example title")
+        .bind("Example content")
         .execute(&pool)
         .await
         .unwrap();

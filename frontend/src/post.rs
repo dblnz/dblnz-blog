@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use yew::prelude::*;
 
-#[derive(Clone, Deserialize, PartialEq, Properties, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Properties, Serialize)]
 pub struct PostProps {
     pub title: String,
     pub content: String,

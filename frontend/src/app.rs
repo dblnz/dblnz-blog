@@ -5,16 +5,14 @@ use wasm_bindgen_futures::spawn_local;
 
 use crate::post::{Post, PostProps};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct User {
-    id: i32,
-    name: String,
-    email: String,
+#[derive(Deserialize, Serialize, Debug, Clone)]
+struct P {
+    title: String,
+    content: String,
 }
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let user_state = use_state(|| ("".to_string(), "".to_string(), None as Option<i32>));
     let message = use_state(|| "".to_string());
     let posts = use_state(Vec::new);
 
@@ -27,10 +25,12 @@ pub fn app() -> Html {
             let message = message.clone();
 
             spawn_local(async move {
-                match Request::get("http://127.0.0.1:8000/api/v1/posts").send().await {
+                match Request::get("http://127.0.0.1:8000/api/v1/ex").send().await {
                     Ok(resp) if resp.ok() => {
-                        let fetched_users: Vec<PostProps> = resp.json().await.unwrap_or_default();
-                        posts.set(fetched_users);
+                        let fetched_posts: Vec<P> = resp.json().await.unwrap_or_default();
+                        println!("{:?}", fetched_posts);
+                        posts.set(fetched_posts);
+                        message.set("Fetched posts".into());
                     }
 
                     _ => message.set("Failed to fetch posts".into()),
@@ -143,7 +143,7 @@ pub fn app() -> Html {
     html! {
         <div class="container mx-auto p-4">
             <h1 class="text-4xl font-bold text-blue-500 mb-4">{ "Posts" }</h1>
-                //<div class="mb-4">
+                <div class="mb-4">
                 //    <input
                 //        placeholder="Name"
                 //        value={user_state.0.clone()}
@@ -176,10 +176,10 @@ pub fn app() -> Html {
                 //        { if user_state.2.is_some() { "Update User" } else { "Create User" } }
                 //
                 //    </button>
-                //        if !message.is_empty() {
-                //        <p class="text-green-500 mt-2">{ &*message }</p>
-                //    }
-                //</div>
+                        if !message.is_empty() {
+                        <p class="text-green-500 mt-2">{ &*message }</p>
+                    }
+                </div>
 
                 <button
                     onclick={get_posts.reform(|_| ())}  
@@ -188,30 +188,22 @@ pub fn app() -> Html {
                     { "Fetch User List" }
                 </button>
 
-                <h2 class="text-2xl font-bold text-gray-700 mb-2">{ "User List" }</h2>
+                <h2 class="text-2xl font-bold text-gray-700 mb-2">{ "Posts List" }</h2>
 
                 <ul class="list-disc pl-5">
-                    { for (*posts).iter().map(|post| {
-                        let title = post.title;
-                        html! {
-                            <li class="mb-2">
-                                <span class="font-semibold">{ format!("ID: {}, Name: {}, Email: {}", user.id, user.name, user.email) }</span>
-                                <button
-                                    onclick={delete_user.clone().reform(move |_| user_id)}
-                                    class="ml-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                                >
-                                    { "Delete" }
-                                </button>
-                                <button
-                                    onclick={edit_user.clone().reform(move |_| user_id)}
-                                    class="ml-4 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
-                                >
-                                    { "Edit" }
-                                </button>
-                            </li>
-                        }
-                    })}
-
+                    {
+                        for (*posts).iter().map(
+                            |post| {
+                                let P {title, content} = &post;
+                                html! {
+                                    <li class="mb-2">
+                                        <span class="font-semibold">{ format!("ID: Test") }</span>
+                                        <Post title={title.clone()} content={content.clone()} />
+                                    </li>
+                                }
+                            }
+                        )
+                    }
                 </ul>
         </div>
     }
