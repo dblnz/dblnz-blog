@@ -46,7 +46,7 @@ pub async fn get_posts(pool: &Pool<Sqlite>) -> Result<Vec<Post>, Box<dyn Error>>
 }
 
 pub async fn get_post_by_id(pool: &Pool<Sqlite>, post_id: u32) -> Post {
-    let post: Post = sqlx::query_as("SELECT * FROM posts WHERE id = (?))")
+    let post: Post = sqlx::query_as("SELECT * FROM posts WHERE id = $1")
         .bind(post_id)
         .fetch_one(pool)
         .await
