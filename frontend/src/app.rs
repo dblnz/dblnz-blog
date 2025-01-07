@@ -1,210 +1,25 @@
-use gloo::net::http::Request;
-use serde::{ Deserialize, Serialize };
 use yew::prelude::*;
-use wasm_bindgen_futures::spawn_local;
+use yew_router::prelude::*;
 
-use crate::post::{Post, PostProps};
+use crate::home::Home;
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
-struct P {
-    title: String,
-    content: String,
+#[derive(Clone, Routable, PartialEq)]
+enum Route {
+    #[at("/")]
+    HomePage,
+}
+
+fn switch(route: Route) -> Html {
+    match route {
+        Route::HomePage => html! { <Home /> },
+    }
 }
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let message = use_state(|| "".to_string());
-    let posts = use_state(Vec::new);
-
-    let get_posts = {
-        let posts = posts.clone();
-        let message = message.clone();
-
-        Callback::from(move |_| {
-            let posts = posts.clone();
-            let message = message.clone();
-
-            spawn_local(async move {
-                match Request::get("http://127.0.0.1:8000/api/v1/ex").send().await {
-                    Ok(resp) if resp.ok() => {
-                        let fetched_posts: Vec<P> = resp.json().await.unwrap_or_default();
-                        println!("{:?}", fetched_posts);
-                        posts.set(fetched_posts);
-                        message.set("Fetched posts".into());
-                    }
-
-                    _ => message.set("Failed to fetch posts".into()),
-                }
-            });
-        })
-    };
-
-    //let create_user = {
-    //    let user_state = user_state.clone();
-    //    let message = message.clone();
-    //    let get_users = get_users.clone();
-    //    Callback::from(move |_| {
-    //        let (name, email, _) = (*user_state).clone();
-    //        let user_state = user_state.clone();
-    //        let message = message.clone();
-    //        let get_users = get_users.clone();
-    //
-    //        spawn_local(async move {
-    //            let user_data = serde_json::json!({ "name": name, "email": email });
-    //
-    //            let response = Request::post("http://127.0.0.1:8000/api/posts")
-    //                .header("Content-Type", "application/json")
-    //                .body(user_data.to_string())
-    //                .send().await;
-    //
-    //            match response {
-    //                Ok(resp) if resp.ok() => {
-    //                    message.set("User created successfully".into());
-    //                    get_users.emit(());
-    //                }
-    //
-    //                _ => message.set("Failed to create user".into()),
-    //            }
-    //
-    //            user_state.set(("".to_string(), "".to_string(), None));
-    //        });
-    //    })
-    //};
-
-    //let update_user = {
-    //    let user_state = user_state.clone();
-    //    let message = message.clone();
-    //    let get_users = get_users.clone();
-    //
-    //    Callback::from(move |_| {
-    //        let (name, email, editing_user_id) = (*user_state).clone();
-    //        let user_state = user_state.clone();
-    //        let message = message.clone();
-    //        let get_users = get_users.clone();
-    //
-    //        if let Some(id) = editing_user_id {
-    //            spawn_local(async move {
-    //                let response = Request::put(&format!("http://127.0.0.1:8000/api/posts/{}", id))
-    //                    .header("Content-Type", "application/json")
-    //                    .body(serde_json::to_string(&(id, name.as_str(), email.as_str())).unwrap())
-    //                    .send().await;
-    //
-    //                match response {
-    //                    Ok(resp) if resp.ok() => {
-    //                        message.set("User updated successfully".into());
-    //                        get_users.emit(());
-    //                    }
-    //
-    //                    _ => message.set("Failed to update user".into()),
-    //                }
-    //
-    //                user_state.set(("".to_string(), "".to_string(), None));
-    //            });
-    //        }
-    //    })
-    //};
-
-    //let delete_user = {
-    //    let message = message.clone();
-    //    let get_users = get_users.clone();
-    //
-    //    Callback::from(move |id: i32| {
-    //        let message = message.clone();
-    //        let get_users = get_users.clone();
-    //
-    //        spawn_local(async move {
-    //            let response = Request::delete(
-    //                &format!("http://127.0.0.1:8000/api/posts/{}", id)
-    //            ).send().await;
-    //
-    //            match response {
-    //                Ok(resp) if resp.ok() => {
-    //                    message.set("User deleted successfully".into());
-    //                    get_users.emit(());
-    //                }
-    //
-    //                _ => message.set("Failed to delete user".into()),
-    //            }
-    //        });
-    //    })
-    //};
-    //
-    //let edit_user = {
-    //    let user_state = user_state.clone();
-    //    let posts = posts.clone();
-    //
-    //    Callback::from(move |id: i32| {
-    //        if let Some(user) = posts.iter().find(|u| u.id == id) {
-    //            user_state.set((user.name.clone(), user.email.clone(), Some(id)));
-    //        }
-    //    })
-    //};
-
     html! {
-        <div class="container mx-auto p-4">
-            <h1 class="text-4xl font-bold text-blue-500 mb-4">{ "Posts" }</h1>
-                <div class="mb-4">
-                //    <input
-                //        placeholder="Name"
-                //        value={user_state.0.clone()}
-                //        oninput={Callback::from({
-                //            let user_state = user_state.clone();
-                //            move |e: InputEvent| {
-                //                let input = e.target_dyn_into::<web_sys::HtmlInputElement>().unwrap();
-                //                user_state.set((input.value(), user_state.1.clone(), user_state.2));
-                //            }
-                //        })}
-                //        class="border rounded px-4 py-2 mr-2"
-                //    />
-                //    <input
-                //        placeholder="Email"
-                //        value={user_state.1.clone()}
-                //        oninput={Callback::from({
-                //            let user_state = user_state.clone();
-                //            move |e: InputEvent| {
-                //                let input = e.target_dyn_into::<web_sys::HtmlInputElement>().unwrap();
-                //                user_state.set((user_state.0.clone(), input.value(), user_state.2));
-                //            }
-                //        })}
-                //        class="border rounded px-4 py-2 mr-2"
-                //    />
-                //
-                //    <button
-                //        onclick={if user_state.2.is_some() { update_user.clone() } else { create_user.clone() }}
-                //        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                //    >
-                //        { if user_state.2.is_some() { "Update User" } else { "Create User" } }
-                //
-                //    </button>
-                        if !message.is_empty() {
-                        <p class="text-green-500 mt-2">{ &*message }</p>
-                    }
-                </div>
-
-                <button
-                    onclick={get_posts.reform(|_| ())}  
-                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mb-4"
-                >
-                    { "Fetch User List" }
-                </button>
-
-                <h2 class="text-2xl font-bold text-gray-700 mb-2">{ "Posts List" }</h2>
-
-                <ul class="list-disc pl-5">
-                    {
-                        for (*posts).iter().map(
-                            |post| {
-                                let P {title, content} = &post;
-                                html! {
-                                    <li class="mb-2">
-                                        <span class="font-semibold">{ format!("ID: Test") }</span>
-                                        <Post title={title.clone()} content={content.clone()} />
-                                    </li>
-                                }
-                            }
-                        )
-                    }
-                </ul>
-        </div>
+        <BrowserRouter>
+            <Switch<Route> render={switch} /> // <- Must be child of <BrowserRouter>
+        </BrowserRouter>
     }
 }
