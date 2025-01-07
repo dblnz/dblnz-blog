@@ -1,66 +1,75 @@
+mod db;
+
+use axum::extract::Path;
 use axum::response::IntoResponse;
 use axum::{Router, routing::get};
-use axum::Json;
+use axum::{Extension, Json};
+use chrono::Utc;
 use sqlx::migrate::MigrateDatabase;
-use sqlx::Sqlite;
+use sqlx::{Pool, Sqlite};
 use std::error::Error;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::json;
+
+use db::{get_post_by_id, get_posts, insert_post, setup_database};
 
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
 struct Post {
+    id: u32,
     title: String,
+    date: String, 
+    desc: String,
     content: String,
-}
-
-async fn return_a_struct_as_json() -> impl IntoResponse {
-     let my_struct = Post { title: "First post".to_string(), content: "Content".to_string() };
-
-     Json(my_struct)
 }
 
 async fn root() -> impl IntoResponse {
     Json(json!("Ok"))
 }
 
+async fn post(
+    Extension(db): Extension<Pool<Sqlite>>,
+    Path(post_id): Path<String>,
+) -> impl IntoResponse {
+    let post_id = post_id.parse::<u32>().unwrap();
 
-const DB: &str = "sqlite://sqlite.db";
+    let post = get_post_by_id(&db, post_id).await;
+
+    Json(post)
+}
+
+async fn posts(
+    Extension(db): Extension<Pool<Sqlite>>,
+) -> impl IntoResponse {
+    let posts = get_posts(&db).await.unwrap();
+
+    Json(posts)
+}
 
 fn api_routes() -> Router {
     Router::new()
         .route("/", get(root))
-        .route("/ex", get(return_a_struct_as_json))
+        .route("/post/{post_id}", get(post))
+        .route("/posts", get(posts))
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    if !Sqlite::database_exists(DB).await.unwrap_or(false) {
-        match Sqlite::create_database(DB).await {
-            Ok(_) => println!("Created db"),
-            Err(error) => println!("Cannot create db"),
-        }
-    }
-    let pool = sqlx::sqlite::SqlitePool::connect(DB).await?;
-    let result = sqlx::query("CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY NOT NULL,
-    title VARCHAR(100) NOT NULL,content VARCHAR(500) NOT NULL);").execute(&pool).await.unwrap();
-    let res = sqlx::query("INSERT INTO posts (title, content) VALUES (?, ?)")
-        .bind("Example title")
-        .bind("Example content")
-        .execute(&pool)
-        .await
-        .unwrap();
+    let pool = setup_database().await.unwrap();
 
-    let posts: Vec<Post> = sqlx::query_as("SELECT * FROM posts")
-        .fetch_all(&pool).await?;
-    for post in posts.iter() {
-        println!("{post:?}");
-    }
+    let now = Utc::now();
+    insert_post(&pool,
+        "New Title".to_string(),
+        now.format("%a %b %e %Y").to_string(),
+        "New blog post about x".to_string(),
+        "We were talking about".to_string(),
+    ).await;
 
     let router = Router::new()
-        .nest("/api/v1", api_routes());
+        .nest("/api/v1", api_routes())
+        .layer(Extension(pool));
 
     let addr = SocketAddr::from(([127,0,0,1], 8000));
     let tcp = TcpListener::bind(&addr).await.unwrap();

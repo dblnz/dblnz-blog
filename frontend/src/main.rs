@@ -1,4 +1,5 @@
 mod app;
+mod home;
 mod post;
 
 use app::App;
