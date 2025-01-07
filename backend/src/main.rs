@@ -36,6 +36,7 @@ async fn post(
     let post_id = post_id.parse::<u32>().unwrap();
 
     let post = get_post_by_id(&db, post_id).await;
+    println!("{:?}", post);
 
     Json(post)
 }
