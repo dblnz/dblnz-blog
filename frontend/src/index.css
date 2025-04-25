@@ -1,3 +1,75 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-in forwards;
+  }
+  
+  .animate-slideInUp {
+    animation: slideInUp 0.4s ease-out forwards;
+  }
+  
+  .transition-theme {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+  
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50;
+  }
+}
+
+/* Accessibility improvements */
+@layer base {
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-500;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Improve readability */
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* High contrast mode improvements */
+  @media (forced-colors: active) {
+    * {
+      border-color: ButtonText;
+    }
+    
+    button, a {
+      forced-color-adjust: none;
+    }
+  }
+}
