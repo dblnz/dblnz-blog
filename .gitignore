@@ -1,0 +1,46 @@
+# Rust backend ignores
+/backend/target/
+/backend/debug/
+/backend/release/
+/backend/**/*.rs.bk
+/backend/*.pdb
+/backend/Cargo.lock
+
+# Database files
+/backend/*.db
+/backend/*.db-shm
+/backend/*.db-wal
+
+# Node.js frontend ignores
+/frontend/node_modules/
+/frontend/.npm
+/frontend/dist/
+/frontend/build/
+/frontend/.cache/
+/frontend/.parcel-cache/
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.pnpm-debug.log*
+
+# TypeScript
+/frontend/**/*.tsbuildinfo
+
+# Generated static files
+/static/
+# /static/assets/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
