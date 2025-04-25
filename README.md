@@ -10,6 +10,7 @@ Built with React + TypeScript + Vite + TailwindCSS.
 - TailwindCSS for responsive styling
 - Markdown rendering for blog posts
 - Dark/light theme support
+- Static blog posts stored as Markdown files
 
 ## Running Locally
 
@@ -17,7 +18,6 @@ Built with React + TypeScript + Vite + TailwindCSS.
 
 - Node.js (v16 or newer)
 - npm or yarn
-- Backend server running (see backend README)
 
 ### Installation
 
@@ -45,6 +45,55 @@ npm run build
 ```
 
 This will create optimized production files in the `./static` directory.
+
+## Adding New Blog Posts
+
+Blog posts are stored as Markdown files in the `src/posts/` directory. Each post is statically included in the build.
+
+### Creating a New Post
+
+1. Create a new Markdown file in the `src/posts/` directory. Use a filename format like `post-5-your-title.md`.
+
+2. Add the required frontmatter at the top of your Markdown file:
+
+   ```markdown
+   ---
+   id: 5
+   title: "Your Blog Post Title"
+   date: "Month Day, Year"
+   description: "A short description of your blog post."
+   readTime: "X min read"
+   tags: ["Tag1", "Tag2", "Tag3"]
+   ---
+
+   # Your Blog Post Title
+
+   Content of your blog post goes here in Markdown format.
+   ```
+
+3. Important frontmatter fields:
+   - `id`: A unique numeric identifier for the post (increment from the last post)
+   - `title`: The title of your blog post
+   - `date`: The publication date in "Month Day, Year" format
+   - `description`: A brief summary of the post
+   - `readTime`: Estimated reading time (optional, will be calculated if omitted)
+   - `tags`: An array of relevant tags for categorization
+
+4. Write your blog post content in Markdown format below the frontmatter.
+
+5. After adding a new post, restart the development server to see your changes.
+
+### Markdown Features
+
+Your blog posts support standard Markdown features:
+
+- Headers (# H1, ## H2, etc.)
+- **Bold** and *italic* text
+- Lists (ordered and unordered)
+- [Links](https://example.com)
+- Images: `![Alt text](image-url)`
+- Code blocks with syntax highlighting
+- And more!
 
 ## Running with Docker
 

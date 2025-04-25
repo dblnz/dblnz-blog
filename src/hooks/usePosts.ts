@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
 import { useNotifications } from '../contexts/NotificationContext';
+import { posts as staticPosts } from '../posts';
 
 // Define TypeScript interfaces for our data models
 export interface Post {
@@ -12,85 +12,6 @@ export interface Post {
   readTime?: string;
   tags?: string[];
 }
-
-// Sample blog data - will be replaced with real data from backend
-const SAMPLE_POSTS: Post[] = [
-  {
-    id: 1,
-    title: "Building a Scalable Microservice Architecture",
-    date: "April 12, 2025",
-    description: "How I redesigned our monolith into microservices and what I learned along the way.",
-    readTime: "8 min read",
-    tags: ["Architecture", "Microservices", "DevOps"],
-    content: `# Building a Scalable Microservice Architecture
-
-## The Challenge
-
-Our team was facing increasing difficulty maintaining our monolithic application. As the codebase grew, deployments became riskier, development velocity slowed, and scaling specific components was impossible without scaling the entire application.
-
-## The Journey
-
-### Step 1: Domain Analysis
-
-The first step was to identify bounded contexts within our application. We conducted several workshops to map out the different domains and their interactions.
-
-### Step 2: Service Boundaries
-
-After identifying the domains, we defined service boundaries. Each service needed to:
-- Be independently deployable
-- Have its own database
-- Handle a specific business capability
-
-### Step 3: Migration Strategy
-
-We adopted the strangler pattern, gradually moving functionality from the monolith to new services while maintaining full functionality.
-
-## Lessons Learned
-
-1. Start with a clear understanding of your domain
-2. Invest in good CI/CD from the beginning
-3. Implement thorough monitoring and observability
-4. Establish clear team ownership for services
-5. Don't break services down too small too early
-
-## Results
-
-Six months after beginning our migration, we had:
-- Improved deployment frequency by 400%
-- Reduced mean time to recovery by 70%
-- Enabled independent scaling of high-load services
-- Allowed teams to adopt different tech stacks where appropriate
-
-The journey wasn't without challenges, but the resulting architecture has significantly improved our ability to innovate and scale.`
-  },
-  {
-    id: 2,
-    title: "Optimizing React Performance: A Case Study",
-    date: "April 5, 2025",
-    description: "How I improved our application's performance by 300% through React optimization techniques.",
-    readTime: "6 min read",
-    tags: ["React", "Performance", "Frontend"],
-    content: "# Optimizing React Performance\n\nThis is a sample post content using Markdown.\n\n## Problem Statement\n\nOur React application was suffering from performance issues...\n\n## Solutions Applied\n\n1. Implemented React.memo for component memoization\n2. Used useCallback and useMemo hooks\n3. Virtualized long lists\n\n## Results\n\nPerformance improved by 300%!"
-  },
-  {
-    id: 3,
-    title: "My Journey Learning Rust for Systems Programming",
-    date: "March 28, 2025",
-    description: "The challenges and rewards of picking up Rust after years of JavaScript development.",
-    readTime: "5 min read",
-    tags: ["Rust", "Systems Programming", "Learning"],
-    content: "# Learning Rust\n\nThis is a sample post content using Markdown."
-  },
-  {
-    id: 4,
-    title: "Implementing Event Sourcing in a Node.js Application",
-    date: "March 20, 2025",
-    description: "How I implemented event sourcing to improve our application's auditability and reliability.",
-    readTime: "7 min read",
-    tags: ["Node.js", "Event Sourcing", "Backend"],
-    content: "# Event Sourcing in Node.js\n\nThis is a sample post content using Markdown."
-  }
-];
 
 interface DateFilter {
   startDate: string | null;
@@ -164,25 +85,21 @@ export const usePosts = () => {
     });
   }, [posts, filters]);
 
-  // Fetch posts from API (currently using sample data)
+  // Fetch posts (now using static markdown files)
   const fetchPosts = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // In a real application, we'd fetch from API
-      // const response = await axios.get('/api/posts');
-      // setPosts(response.data);
-      
-      // Using sample data for now with simulated API delay
+      // Simulate a small delay to show loading state (optional)
       setTimeout(() => {
-        setPosts(SAMPLE_POSTS);
+        setPosts(staticPosts);
         setLoading(false);
         addNotification('success', 'Blog posts loaded successfully', 3000);
-      }, 1000);
+      }, 300);
 
     } catch (err) {
-      const errorMessage = 'Failed to fetch blog posts';
+      const errorMessage = 'Failed to load blog posts';
       setError(errorMessage);
       addNotification('error', errorMessage, 0);
       setLoading(false);
