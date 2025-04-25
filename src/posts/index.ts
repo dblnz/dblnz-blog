@@ -2,7 +2,7 @@ import { Post } from '../hooks/usePosts';
 import { loadMarkdownPost } from '../utils/markdownUtils';
 
 // Use dynamic imports for markdown files - this is natively supported by Vite
-const postFiles = import.meta.glob('./**.md', { query: '?raw', import: 'default', eager: true });
+const postFiles = import.meta.glob<string>('./**.md', { query: '?raw', import: 'default', eager: true });
 
 // Convert the imported markdown contents to Post objects
 export const posts: Post[] = Object.entries(postFiles).map(([path, content]) => {
