@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import { resolve } from 'path'
+import { cpSync, existsSync, mkdirSync } from 'fs'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,9 +19,9 @@ export default defineConfig({
         global: true,
         process: true,
       },
-    }),
+    })
   ],
-  assetsInclude: ['**/*.md'],
+  assetsInclude: ['**/*.md'],  // Ensure markdown files are treated as assets
   build: {
     outDir: './static',
     emptyOutDir: true,
@@ -36,5 +38,10 @@ export default defineConfig({
   server: {
     // This ensures that the dev server properly handles client-side routing
     historyApiFallback: true,
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    }
   }
 })
