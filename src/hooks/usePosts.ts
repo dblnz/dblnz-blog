@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { posts as staticPosts } from '../posts';
 
@@ -86,7 +86,7 @@ export const usePosts = () => {
   }, [posts, filters]);
 
   // Fetch posts (now using static markdown files)
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -95,7 +95,6 @@ export const usePosts = () => {
       setTimeout(() => {
         setPosts(staticPosts);
         setLoading(false);
-        addNotification('success', 'Blog posts loaded successfully', 3000);
       }, 300);
 
     } catch (err) {
@@ -105,44 +104,51 @@ export const usePosts = () => {
       setLoading(false);
       console.error(err);
     }
-  };
+  }, [addNotification]);
 
   // Initialize by fetching posts
   useEffect(() => {
     fetchPosts();
-  }, [addNotification]);
+    // We only want to run this once when the component mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps  
+  }, []);
 
   // Function to get post by ID
-  const getPostById = (id: number): Post | undefined => {
+  const getPostById = useCallback((id: number): Post | undefined => {
     return posts.find(post => post.id === id);
-  };
+  }, [posts]);
 
   // View a specific post
-  const viewPost = (id: number): void => {
+  const viewPost = useCallback((id: number): boolean => {
     const post = getPostById(id);
     if (post) {
       setSelectedPost(post);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Don't show any notification when the post is found
+      return true;
     } else {
-      addNotification('error', `Post with ID ${id} not found`, 3000);
+      // Show a more persistent error notification when post is not found
+      addNotification('error', `Post with ID ${id} not found. Redirecting to home page...`, 6000);
+      // Return false to indicate the post wasn't found
+      return false;
     }
-  };
+  }, [getPostById, addNotification]);
 
   // Return to post list
-  const returnToList = (): void => {
+  const returnToList = useCallback((): void => {
     setSelectedPost(null);
-  };
+  }, []);
 
   // Update filters
-  const updateFilters = (newFilters: Partial<PostsFilter>) => {
+  const updateFilters = useCallback((newFilters: Partial<PostsFilter>) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters
     }));
-  };
+  }, []);
 
   // Toggle a tag filter
-  const toggleTagFilter = (tag: string) => {
+  const toggleTagFilter = useCallback((tag: string) => {
     setFilters(prev => {
       if (prev.tags.includes(tag)) {
         return {
@@ -156,17 +162,17 @@ export const usePosts = () => {
         };
       }
     });
-  };
+  }, []);
 
   // Clear all filters
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilters({
       tags: [],
       dateRange: { startDate: null, endDate: null },
       searchQuery: '',
     });
     addNotification('info', 'Filters cleared', 2000);
-  };
+  }, [addNotification]);
 
   return {
     posts: filteredPosts,
@@ -180,6 +186,7 @@ export const usePosts = () => {
     returnToList,
     updateFilters,
     toggleTagFilter,
-    clearFilters
+    clearFilters,
+    getPostById
   };
 };

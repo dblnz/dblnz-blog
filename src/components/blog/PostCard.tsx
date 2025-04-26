@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Post } from '../../hooks/usePosts';
 import { Theme } from '../../hooks/useTheme';
@@ -11,17 +12,16 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({ post, theme, onClick }) => {
   return (
-    <div
-      className={`p-6 rounded-xl ${theme.cardBg} ${theme.cardShadow} cursor-pointer transition-all transform hover:scale-[1.01] duration-200`}
-      onClick={onClick}
-      role="article"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
+    <Link
+      to={`/post/${post.id}`}
+      className={`block p-6 rounded-xl ${theme.cardBg} ${theme.cardShadow} transition-all transform hover:scale-[1.01] duration-200`}
+      onClick={(e) => {
+        // Prevent default behavior to let the onClick handler manage navigation
+        // This ensures our viewPost logic runs while still using the Link component
+        e.preventDefault();
+        onClick();
       }}
+      role="article"
     >
       {post.tags && (
         <div className="flex flex-wrap gap-2 mb-3">
@@ -55,7 +55,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, theme, onClick }) => {
       <div className={`mt-2 text-sm font-medium ${theme.primary} flex items-center group`}>
         Read article <ArrowRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform duration-200" />
       </div>
-    </div>
+    </Link>
   );
 };
 

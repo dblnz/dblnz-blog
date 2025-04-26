@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import Sidebar from './layout/Sidebar';
@@ -23,8 +24,13 @@ const TechBlog: React.FC = () => {
     returnToList,
     toggleTagFilter,
     updateFilters,
-    clearFilters
+    clearFilters,
+    getPostById
   } = usePosts();
+  
+  // React Router hooks
+  const { postId } = useParams<{ postId: string }>();
+  const navigate = useNavigate();
 
   // Update date filter
   const handleDateFilterChange = (dateRange: { startDate: string | null; endDate: string | null }) => {
@@ -35,6 +41,45 @@ const TechBlog: React.FC = () => {
   const handleSearchQueryChange = (searchQuery: string) => {
     updateFilters({ searchQuery });
   };
+  
+  // Handle navigation to a post
+  const handleViewPost = (id: number) => {
+    navigate(`/post/${id}`);
+    viewPost(id);
+  };
+  
+  // Handle returning to the list view
+  const handleReturnToList = () => {
+    navigate('/');
+    returnToList();
+  };
+  
+  // Create a stable reference to the post loading function
+  const loadPostFromUrl = useCallback(() => {
+    if (postId) {
+      const id = parseInt(postId, 10);
+      if (!isNaN(id)) {
+        // If the post doesn't exist, redirect to home page after showing the error
+        const postFound = viewPost(id);
+        if (!postFound) {
+          // Wait a moment to allow the error notification to be seen
+          setTimeout(() => {
+            navigate('/');
+            returnToList();
+          }, 1500);
+        }
+        // No else block needed - if post is found, viewPost already sets selectedPost
+      } else {
+        // If postId isn't a valid number, redirect to home
+        navigate('/');
+      }
+    }
+  }, [postId, viewPost, navigate, returnToList]);
+  
+  // Effect to load the correct post from the URL when the component mounts or URL changes
+  useEffect(() => {
+    loadPostFromUrl();
+  }, [loadPostFromUrl]);
 
   return (
     <div className={`min-h-screen flex flex-col ${theme.background} ${theme.text} font-sans transition-theme`}>
@@ -65,7 +110,7 @@ const TechBlog: React.FC = () => {
             <PostView 
               post={selectedPost} 
               theme={theme} 
-              onBack={returnToList} 
+              onBack={handleReturnToList} 
               darkMode={darkMode} 
             />
           ) : (
@@ -74,7 +119,7 @@ const TechBlog: React.FC = () => {
               posts={posts}
               theme={theme}
               loading={loading && posts.length > 0}
-              onPostClick={viewPost}
+              onPostClick={handleViewPost}
               dateFilter={filters.dateRange}
               searchQuery={filters.searchQuery}
               onUpdateDateFilter={handleDateFilterChange}

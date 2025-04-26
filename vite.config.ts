@@ -32,5 +32,9 @@ export default defineConfig({
         }
       }
     }
+  },
+  server: {
+    // This ensures that the dev server properly handles client-side routing
+    historyApiFallback: true,
   }
 })
