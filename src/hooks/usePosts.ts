@@ -11,6 +11,7 @@ export interface Post {
   content: string;
   readTime?: string;
   tags?: string[];
+  comingSoon?: boolean;
 }
 
 interface DateFilter {

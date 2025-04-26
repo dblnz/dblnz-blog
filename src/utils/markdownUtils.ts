@@ -22,6 +22,7 @@ export const loadMarkdownPost = (content: string, filename: string): Post => {
     content: markdownContent,
     readTime: frontmatter.readTime || calculateReadTime(markdownContent),
     tags: frontmatter.tags || [],
+    comingSoon: frontmatter.comingSoon || false,
   };
 };
 

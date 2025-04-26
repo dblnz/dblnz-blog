@@ -39,16 +39,24 @@ const PostCard: React.FC<PostCardProps> = ({ post, theme, onClick }) => {
       )}
 
       <h3 className="text-xl font-bold mb-2 leading-snug">{post.title}</h3>
+      
+      {post.comingSoon && (
+        <div className="text-amber-500 dark:text-amber-400 font-medium text-sm mb-2">
+          Coming Soon
+        </div>
+      )}
 
-      <div className="flex items-center mb-3">
-        <div className={`text-sm ${theme.muted}`}>{post.date}</div>
-        {post.readTime && (
-          <>
-            <span className="mx-2 text-gray-400">•</span>
-            <div className={`text-sm ${theme.muted}`}>{post.readTime}</div>
-          </>
-        )}
-      </div>
+      {!post.comingSoon && (
+        <div className="flex items-center mb-3">
+          <div className={`text-sm ${theme.muted}`}>{post.date}</div>
+          {post.readTime && (
+            <>
+              <span className="mx-2 text-gray-400">•</span>
+              <div className={`text-sm ${theme.muted}`}>{post.readTime}</div>
+            </>
+          )}
+        </div>
+      )}
 
       <p className={`mb-4 ${theme.secondary}`}>{post.description}</p>
 

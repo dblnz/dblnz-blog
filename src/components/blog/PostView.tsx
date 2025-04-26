@@ -27,16 +27,24 @@ const PostView: React.FC<PostViewProps> = ({ post, theme, onBack, darkMode }) =>
           {post.title}
         </h1>
 
-        <div className="flex items-center mb-6">
-          <div className={`mr-6 ${theme.muted}`}>
-            {post.date}
+        {post.comingSoon && (
+          <div className="text-amber-500 dark:text-amber-400 font-medium text-sm mb-4">
+            Coming Soon
           </div>
-          {post.readTime && (
-            <div className={`${theme.muted}`}>
-              {post.readTime}
+        )}
+
+        {!post.comingSoon && (
+          <div className="flex items-center mb-6">
+            <div className={`mr-6 ${theme.muted}`}>
+              {post.date}
             </div>
-          )}
-        </div>
+            {post.readTime && (
+              <div className={`${theme.muted}`}>
+                {post.readTime}
+              </div>
+            )}
+          </div>
+        )}
 
         {post.tags && (
           <div className="flex flex-wrap gap-2 mb-8">
