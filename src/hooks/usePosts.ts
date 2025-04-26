@@ -123,21 +123,25 @@ export const usePosts = () => {
   const viewPost = useCallback((id: number): boolean => {
     const post = getPostById(id);
     if (post) {
-      setSelectedPost(post);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // Don't show any notification when the post is found
+      // Only set selectedPost if it's different from current or null
+      // This helps with browser back/forward navigation
+      if (!selectedPost || selectedPost.id !== post.id) {
+        setSelectedPost(post);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return true;
     } else {
       // Show a more persistent error notification when post is not found
       addNotification('error', `Post with ID ${id} not found. Redirecting to home page...`, 6000);
-      // Return false to indicate the post wasn't found
       return false;
     }
-  }, [getPostById, addNotification]);
+  }, [getPostById, addNotification, selectedPost]);
 
   // Return to post list
   const returnToList = useCallback((): void => {
     setSelectedPost(null);
+    // Scroll to top when returning to list view
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   // Update filters

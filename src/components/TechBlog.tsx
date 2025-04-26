@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import Sidebar from './layout/Sidebar';
@@ -9,6 +9,7 @@ import SkipLink from './ui/SkipLink';
 import LoadingOverlay from './ui/LoadingOverlay';
 import { useTheme } from '../hooks/useTheme';
 import { usePosts } from '../hooks/usePosts';
+import { useNotifications } from '../contexts/NotificationContext';
 import { AUTHOR } from '../data/author';
 
 const TechBlog: React.FC = () => {
@@ -27,6 +28,7 @@ const TechBlog: React.FC = () => {
     clearFilters,
     getPostById
   } = usePosts();
+  const { addNotification } = useNotifications();
   
   // State to control sidebar visibility with animation
   const [sidebarVisible, setSidebarVisible] = useState(true);
@@ -34,7 +36,24 @@ const TechBlog: React.FC = () => {
   // React Router hooks
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
-
+  const location = useLocation();
+  
+  // Function to extract post ID from GitHub Pages URL format if needed
+  const getEffectivePostId = useCallback(() => {
+    // First check if we have a postId from useParams (normal URL)
+    if (postId) {
+      return postId;
+    }
+    
+    // Check if this is a GitHub Pages URL format (/?/post/1)
+    if (location.pathname === '/' && location.search.startsWith('?/post/')) {
+      const match = location.search.match(/^\?\/post\/(\d+)/);
+      return match ? match[1] : null;
+    }
+    
+    return null;
+  }, [postId, location.pathname, location.search]);
+  
   // Update date filter
   const handleDateFilterChange = (dateRange: { startDate: string | null; endDate: string | null }) => {
     updateFilters({ dateRange });
@@ -58,7 +77,7 @@ const TechBlog: React.FC = () => {
   
   // Handle returning to the list view
   const handleReturnToList = () => {
-    navigate('/');
+    navigate('/', { state: { navigatedBack: true } });
     returnToList();
     // Show sidebar again after returning to list
     setSidebarVisible(true);
@@ -66,30 +85,58 @@ const TechBlog: React.FC = () => {
   
   // Create a stable reference to the post loading function
   const loadPostFromUrl = useCallback(() => {
-    if (postId) {
-      const id = parseInt(postId, 10);
+    const effectivePostId = getEffectivePostId();
+    
+    if (effectivePostId) {
+      const id = parseInt(effectivePostId, 10);
       if (!isNaN(id)) {
+        // Skip trying to view the post if posts are still loading
+        if (loading) {
+          return;
+        }
+        
         // If the post doesn't exist, redirect to home page after showing the error
         const postFound = viewPost(id);
         if (!postFound) {
-          // Wait a moment to allow the error notification to be seen
-          setTimeout(() => {
-            navigate('/');
-            returnToList();
-          }, 1500);
+          // Show error notification immediately
+          addNotification(
+            'error', 
+            `Post with ID ${id} not found.`,
+            6000
+          );
+          
+          // Immediately navigate back to home to avoid blank page
+          navigate('/', { replace: true });
+          returnToList();
+          setSidebarVisible(true);
+        } else {
+          // When viewing a post from URL, ensure sidebar is hidden
+          setSidebarVisible(false);
         }
-        // No else block needed - if post is found, viewPost already sets selectedPost
       } else {
-        // If postId isn't a valid number, redirect to home
-        navigate('/');
+        // If postId isn't a valid number, redirect to home immediately
+        navigate('/', { replace: true });
+        returnToList();
+        setSidebarVisible(true);
       }
+    } else {
+      // If no postId in URL, make sure we're in list view
+      returnToList();
+      setSidebarVisible(true);
     }
-  }, [postId, viewPost, navigate, returnToList]);
+  }, [getEffectivePostId, loading, viewPost, navigate, returnToList, addNotification, setSidebarVisible]);
   
   // Effect to load the correct post from the URL when the component mounts or URL changes
   useEffect(() => {
     loadPostFromUrl();
-  }, [loadPostFromUrl]);
+  }, [loadPostFromUrl, location.pathname]); // Add location.pathname as a dependency
+  
+  // Additional effect to load post from URL when posts finish loading
+  useEffect(() => {
+    if (!loading && postId) {
+      loadPostFromUrl();
+    }
+  }, [loading, postId, loadPostFromUrl]);
 
   return (
     <div className={`min-h-screen flex flex-col ${theme.background} ${theme.text} font-sans transition-theme`}>

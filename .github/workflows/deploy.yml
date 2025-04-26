@@ -29,6 +29,13 @@ jobs:
       
       - name: Build
         run: npm run build
+        
+      - name: Ensure 404.html is present
+        run: |
+          if [ ! -f ./static/404.html ]; then
+            echo "404.html not found in build output, copying from public directory"
+            cp ./public/404.html ./static/404.html
+          fi
       
       # Deploy only on push to main
       - name: Deploy
@@ -38,4 +45,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./static
           publish_branch: gh-pages
-          keep_files: true
