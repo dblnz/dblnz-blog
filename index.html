@@ -15,28 +15,43 @@
     // Single Page Apps for GitHub Pages
     // MIT License - https://github.com/rafgraph/spa-github-pages
     
-    // This script checks to see if a redirect is present in the query string.
-    // If it is, it will redirect to the path specified and remove the query parameter.
+    // This script checks to see if a redirect is present in the query string,
+    // converts it back to the correct url and adds it to the
+    // browser's history using window.history.replaceState(...),
+    // which won't cause the browser to attempt to load the new url.
+    // When the single page app is loaded further down in this file,
+    // the correct url will be waiting in the browser's history for
+    // the single page app to route accordingly.
     (function(l) {
       if (l.search[1] === '/' ) {
         var decoded = l.search.slice(1).split('&').map(function(s) { 
           return s.replace(/~and~/g, '&')
         }).join('?');
-        window.history.replaceState(null, null,
-            l.pathname + decoded + l.hash
+        
+        window.history.replaceState(
+          null, 
+          null,
+          l.pathname.slice(0, -1) + decoded + l.hash
         );
+        
+        // Force React Router to recognize the new path
+        if (window.routerForceUpdate) {
+          setTimeout(function() {
+            window.routerForceUpdate();
+          }, 100);
+        }
       }
     }(window.location))
   </script>
   <!-- End Single Page Apps for GitHub Pages -->
-  <script type="module" crossorigin src="./assets/index-Pikh1V0I.js"></script>
+  <script type="module" crossorigin src="./assets/index-BdGuUBlR.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/extend-BjvkTp69.js">
   <link rel="modulepreload" crossorigin href="./assets/react-UY0U58as.js">
   <link rel="modulepreload" crossorigin href="./assets/scheduler-CzFDRTuY.js">
   <link rel="modulepreload" crossorigin href="./assets/react-dom-6J525XsD.js">
   <link rel="modulepreload" crossorigin href="./assets/@remix-run-DyRdwddT.js">
-  <link rel="modulepreload" crossorigin href="./assets/react-router-CNogz1mz.js">
-  <link rel="modulepreload" crossorigin href="./assets/react-router-dom-BrB0R_5h.js">
+  <link rel="modulepreload" crossorigin href="./assets/react-router-B1nHMeJe.js">
+  <link rel="modulepreload" crossorigin href="./assets/react-router-dom-B417hmLP.js">
   <link rel="modulepreload" crossorigin href="./assets/lucide-react-z8hEO9Kd.js">
   <link rel="modulepreload" crossorigin href="./assets/devlop-Cl3hj7Sz.js">
   <link rel="modulepreload" crossorigin href="./assets/bail-FqpXQuLt.js">
