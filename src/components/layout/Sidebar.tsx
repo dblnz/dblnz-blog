@@ -1,7 +1,7 @@
 import React from 'react';
-import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
 import { Theme } from '../../hooks/useTheme';
 import { Author } from '../../data/author';
+import { GithubIcon, BlueskyIcon, LinkedInIcon, Mail } from '../ui/SocialIcons';
 
 interface SidebarProps {
   theme: Theme;
@@ -43,16 +43,16 @@ const Sidebar: React.FC<SidebarProps> = ({
               className={`p-2 rounded-full ${theme.iconBg} ${theme.iconColor} transition-colors duration-200 hover:scale-105`}
               aria-label="GitHub"
             >
-              <Github size={18} />
+              <GithubIcon />
             </a>
             <a 
-              href={`https://${author.x}`} 
+              href="https://bsky.app/profile/dblnz.dev" 
               target="_blank" 
               rel="noopener noreferrer"
               className={`p-2 rounded-full ${theme.iconBg} ${theme.iconColor} transition-colors duration-200 hover:scale-105`}
-              aria-label="Twitter"
+              aria-label="Bluesky"
             >
-              <Twitter size={18} />
+              <BlueskyIcon />
             </a>
             <a 
               href={`https://${author.linkedin}`} 
@@ -61,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               className={`p-2 rounded-full ${theme.iconBg} ${theme.iconColor} transition-colors duration-200 hover:scale-105`}
               aria-label="LinkedIn"
             >
-              <Linkedin size={18} />
+              <LinkedInIcon />
             </a>
             <a 
               href={`mailto:${author.email}`}

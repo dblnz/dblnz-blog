@@ -4,7 +4,7 @@ export interface Author {
   bio: string;
   profession: string;
   github: string;
-  x: string;
+  bluesky: string;
   linkedin: string;
   email: string;
 }
@@ -16,7 +16,7 @@ export const AUTHOR: Author = {
   profession: "Software Engineer",
   bio: "Passionate about systems, Rust, and clean code. Currently exploring WebAssembly.",
   github: "github.com/dblnz",
-  x: "x.com/dblnz",
+  bluesky: "dblnz",
   linkedin: "linkedin.com/in/dblnz",
   email: "dblnz@pm.me"
 };

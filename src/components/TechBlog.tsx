@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
@@ -28,6 +28,9 @@ const TechBlog: React.FC = () => {
     getPostById
   } = usePosts();
   
+  // State to control sidebar visibility with animation
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  
   // React Router hooks
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
@@ -44,14 +47,21 @@ const TechBlog: React.FC = () => {
   
   // Handle navigation to a post
   const handleViewPost = (id: number) => {
-    navigate(`/post/${id}`);
-    viewPost(id);
+    // Hide sidebar with animation
+    setSidebarVisible(false);
+    // Small delay to allow the animation to play before navigation
+    setTimeout(() => {
+      navigate(`/post/${id}`);
+      viewPost(id);
+    }, 200);
   };
   
   // Handle returning to the list view
   const handleReturnToList = () => {
     navigate('/');
     returnToList();
+    // Show sidebar again after returning to list
+    setSidebarVisible(true);
   };
   
   // Create a stable reference to the post loading function
@@ -93,18 +103,24 @@ const TechBlog: React.FC = () => {
       <Header theme={theme} darkMode={darkMode} toggleTheme={toggleTheme} />
 
       {/* Main Content */}
-      <main id="main-content" className="flex-grow container mx-auto px-4 py-8 md:flex md:gap-8 animate-fadeIn">
-        {/* Left Sidebar */}
-        <Sidebar
-          theme={theme}
-          author={AUTHOR}
-          availableTags={availableTags}
-          selectedTags={filters.tags}
-          onToggleTag={toggleTagFilter}
-        />
+      <main id="main-content" className={`flex-grow container mx-auto px-4 py-8 md:flex md:gap-8 ${selectedPost ? 'justify-center' : ''} animate-fadeIn`}>
+        {/* Left Sidebar - only visible on list view or animating out */}
+        <div className={`transition-all duration-300 ease-in-out ${
+          sidebarVisible 
+            ? 'md:w-72 opacity-100' 
+            : 'md:w-0 opacity-0 overflow-hidden'
+        } flex-shrink-0 mb-8 md:mb-0`}>
+          <Sidebar
+            theme={theme}
+            author={AUTHOR}
+            availableTags={availableTags}
+            selectedTags={filters.tags}
+            onToggleTag={toggleTagFilter}
+          />
+        </div>
 
         {/* Right Content Area */}
-        <div className="md:flex-grow">
+        <div className={`md:flex-grow ${selectedPost ? 'max-w-3xl mx-auto' : ''}`}>
           {selectedPost ? (
             // Single Post View
             <PostView 
