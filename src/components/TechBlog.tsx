@@ -155,7 +155,7 @@ const TechBlog: React.FC = () => {
         <div className={`transition-all duration-300 ease-in-out ${
           sidebarVisible 
             ? 'md:w-72 opacity-100' 
-            : 'md:w-0 opacity-0 overflow-hidden'
+            : 'md:w-0 md:opacity-0 md:overflow-hidden hidden md:block'
         } flex-shrink-0 mb-8 md:mb-0`}>
           <Sidebar
             theme={theme}

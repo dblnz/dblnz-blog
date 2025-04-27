@@ -20,12 +20,22 @@ export default defineConfig({
         process: true,
       },
     }),
-    // Custom plugin to copy 404.html and other critical files to build output
+    // Custom plugin to copy GitHub Pages files to build output
     {
       name: 'copy-github-pages-files',
       closeBundle() {
-        // Copy 404.html file to build output
+        // Copy critical files to build output
         try {
+          // Copy favicon files
+          cpSync('./public/favicon.ico', './static/favicon.ico', { force: true });
+          console.log('Successfully copied favicon.ico to build output');
+          
+          if (existsSync('./public/favicon.svg')) {
+            cpSync('./public/favicon.svg', './static/favicon.svg', { force: true });
+            console.log('Successfully copied favicon.svg to build output');
+          }
+          
+          // Copy 404.html file
           cpSync('./public/404.html', './static/404.html', { force: true });
           console.log('Successfully copied 404.html to build output');
           
@@ -50,6 +60,7 @@ export default defineConfig({
   build: {
     outDir: './static',
     emptyOutDir: true,
+    sourcemap: false,  // Disable source maps in production build
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -63,6 +74,13 @@ export default defineConfig({
   server: {
     // This ensures that the dev server properly handles client-side routing
     historyApiFallback: true,
+    // Configure source map handling
+    sourcemapIgnoreList: (sourcePath) => {
+      // Ignore node_modules from source maps
+      return sourcePath.includes('node_modules') || 
+             sourcePath.includes('react_devtools_backend') || 
+             sourcePath.includes('installHook.js');
+    },
   },
   resolve: {
     alias: {
